@@ -1,0 +1,16 @@
+{
+  "name": "compose-s3-demo",
+  "version": "0.0.1",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "ntli build -a",
+    "dev": "ntli dev -c",
+    "preview": "ntli preview"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.427.0",
+    "@netlify/sdk": "^1.1.1",
+    "typescript": "^5.2.2"
+  }
+}

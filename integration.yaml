@@ -1,0 +1,3 @@
+# yaml-language-server: $schema=https://sdk.netlify.com/config-schema.json
+config:
+  slug: gjw9ia05-compose-test
