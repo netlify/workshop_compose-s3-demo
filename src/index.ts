@@ -1,6 +1,7 @@
 // Documentation: https://sdk.netlify.com
 import { NetlifyIntegration } from "@netlify/sdk";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import csv from "csvtojson";
 
 const integration = new NetlifyIntegration();
 const connector = integration.addConnector({
@@ -63,19 +64,6 @@ connector.model(async ({ define }) => {
       },
     },
   });
-  define.nodeModel({
-    name: "Product",
-    fields: {
-      name: {
-        type: "String",
-        required: true,
-      },
-      description: {
-        type: "String",
-        required: true,
-      },
-    },
-  });
 });
 
 /**
@@ -84,7 +72,7 @@ connector.model(async ({ define }) => {
  */
 connector.event(
   "createAllNodes",
-  async ({ models }, { accessKeyId, secretAccessKey }) => {
+  async ({ models }, { accessKeyId, secretAccessKey, bucketName }) => {
     const client = new S3Client({
       credentials: {
         accessKeyId: accessKeyId as string,
@@ -105,20 +93,12 @@ connector.event(
 
       if (!str) throw new Error("No body");
 
-      const products = str
-        .split("\n")
-        .filter((line) => line !== "")
-        // Skip the header row
-        .slice(1)
-        .map((line) => {
-          const [slug, title, author, description, imagePath, price, isbn] =
-            line.split(",");
-          return { slug, title, author, description, imagePath, price, isbn };
-        });
+      const products = await csv().fromString(str);
 
-      products.forEach(({ slug, ...product }, index) => {
+      products.forEach(({ slug, imagePath, ...product }, index) => {
         models.Book.create({
           id: slug,
+          imagePath: `https://${bucketName}.s3.amazonaws.com${imagePath}`,
           ...product,
         });
       });
